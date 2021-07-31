@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  web:
+    image: webserver:v1 
+    container_name: apache
+    volumes:
+      - "/www/docs:/var/www/html"
+    ports:
+      - "8080:80"
+
