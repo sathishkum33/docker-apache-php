@@ -45,6 +45,7 @@ RUN yum -y install supervisor \
     zip \
     which \
     freetds \
+    sudo \
     cronie && yum clean all
 
 # Add config files and scripts
@@ -61,7 +62,7 @@ RUN sed -E -i -e 's/^short_open_tag = Off/short_open_tag = On/' /etc/php.ini \
  
 RUN echo "ServerTokens Prod" >> /etc/httpd/conf/httpd.conf \
    && echo "ServerSignature Off" >> /etc/httpd/conf/httpd.conf \
-   && echo "Header unset X-Powered-By" >> /etc/httpd/conf/httpd.conf
+   && echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf
 
 # Configure servicies
 ADD lib/start.sh /start.sh
