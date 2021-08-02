@@ -50,8 +50,8 @@ RUN yum -y install supervisor \
 
 # Add config files and scripts
 COPY lib/httpd /etc/init.d
-ADD lib/vhost.conf /etc/httpd/conf.d/default-vhost.conf
 COPY lib/php-fpm /etc/init.d
+RUN chmod 755 /var/log/httpd
 RUN mkdir -p /run/php-fpm
 
 RUN sed -E -i -e 's/^short_open_tag = Off/short_open_tag = On/' /etc/php.ini \
@@ -62,13 +62,20 @@ RUN sed -E -i -e 's/^short_open_tag = Off/short_open_tag = On/' /etc/php.ini \
  
 RUN echo "ServerTokens Prod" >> /etc/httpd/conf/httpd.conf \
    && echo "ServerSignature Off" >> /etc/httpd/conf/httpd.conf \
-   && echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf
+   && echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e 's/^Listen 80/Listen 9187/' /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e 's/^DocumentRoot "\/var\/www\/html"/#DocumentRoot "\/var\/www\/html"/' /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e 's/DirectoryIndex index.html/DirectoryIndex index.html index.phtml index.php default.php default.phtml/' /etc/httpd/conf/httpd.conf \   
+   &&  sed -E -i -e  '/LogFormat.*common/a \   \ ErrorLogFormat "{ \\"time\\":\\"%t\\", \\"function\\":\\"[%-m:%l]\\", \\"pid\\":\\"%P\\", \\"message\\":\\"%M\\", \\"vhost-ServerName\\":\\"%v\\", \\"referer\\":\\"%-{Referer}i\\" }"' /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e  '/LogFormat.*common/a \   \ LogFormat "{ \\"time\\":\\"%t\\", \\"time-taken\\":\\"%T\\", \\"IP-client\\":\\"%{X-Forwarded-For}i\\", \\"IP-remote\\":\\"%a\\", \\"remote-hostname\\":\\"%h\\", \\"request-url\\":\\"%V\\", \\"request-context\\":\\"%U\\", \\"query\\":\\"%q\\", \\"method\\":\\"%m\\", \\"status\\":\\"%>s\\", \\"vhost-ServerName\\":\\"%v\\", \\"userAgent\\":\\"%{User-agent}i\\", \\"referer\\":\\"%{Referer}i\\" }" json' /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e 's/CustomLog "logs\/access_log" combined/CustomLog "\/var\/log\/httpd\/httpd_access_log.json" combined/' /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e 's/ErrorLog "logs\/error_log"/ErrorLog "\/var\/log\/httpd\/httpd_error_log.json"/' /etc/httpd/conf/httpd.conf 
 
 # Configure servicies
 ADD lib/start.sh /start.sh
 ADD lib/supervisord.conf /etc/supervisord.d/httpd.ini
 RUN chmod 755 /start.sh
  
-EXPOSE 80
+EXPOSE 9187
  
 CMD ["/bin/bash", "/start.sh"]
