@@ -3,6 +3,9 @@ FROM oraclelinux:8.4
 	
 MAINTAINER Sathish Kumar <sathishkum33@gmail.com>
 
+#Adding argument for build
+ARG app_port
+
 # Add EPERL repo
 RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
 RUN yum install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y
@@ -16,7 +19,7 @@ RUN dnf module reset php -y
 RUN dnf module install php:remi-7.4 -y
 
 # Update the repository sources list
-RUN yum -y update &&  yum clean all
+RUN yum -y update
 	
 # Install Apache, PHP and misc tools
 RUN yum -y install supervisor \
@@ -46,7 +49,7 @@ RUN yum -y install supervisor \
     which \
     freetds \
     sudo \
-    cronie && yum clean all
+    cronie
 
 # Add config files and scripts
 COPY lib/httpd /etc/init.d
@@ -63,7 +66,8 @@ RUN sed -E -i -e 's/^short_open_tag = Off/short_open_tag = On/' /etc/php.ini \
 RUN echo "ServerTokens Prod" >> /etc/httpd/conf/httpd.conf \
    && echo "ServerSignature Off" >> /etc/httpd/conf/httpd.conf \
    && echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf \
-   && sed -E -i -e 's/^Listen 80/Listen 9187/' /etc/httpd/conf/httpd.conf \
+   && echo "Header always unset X-Powered-By" >> /etc/httpd/conf/httpd.conf \
+   && sed -E -i -e "s/^Listen 80/Listen ${app_port}/" /etc/httpd/conf/httpd.conf \
    && sed -E -i -e 's/^DocumentRoot "\/var\/www\/html"/#DocumentRoot "\/var\/www\/html"/' /etc/httpd/conf/httpd.conf \
    && sed -E -i -e 's/DirectoryIndex index.html/DirectoryIndex index.html index.phtml index.php default.php default.phtml/' /etc/httpd/conf/httpd.conf \   
    &&  sed -E -i -e  '/LogFormat.*common/a \   \ ErrorLogFormat "{ \\"time\\":\\"%t\\", \\"function\\":\\"[%-m:%l]\\", \\"pid\\":\\"%P\\", \\"message\\":\\"%M\\", \\"vhost-ServerName\\":\\"%v\\", \\"referer\\":\\"%-{Referer}i\\" }"' /etc/httpd/conf/httpd.conf \
@@ -76,6 +80,6 @@ ADD lib/start.sh /start.sh
 ADD lib/supervisord.conf /etc/supervisord.d/httpd.ini
 RUN chmod 755 /start.sh
  
-EXPOSE 9187
+EXPOSE $app_port
  
 CMD ["/bin/bash", "/start.sh"]

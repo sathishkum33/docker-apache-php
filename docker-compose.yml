@@ -3,12 +3,45 @@ services:
   galepages:
     build:
      context: .
-     dockerfile: Dockerfile 
+     dockerfile: Dockerfile
+     args:
+      - app_port=9187 
     image: galepages:v1
-    container_name: apache
+    container_name: galepages
     volumes:
       - "/var/www/html/galepages:/var/www/html/galepages"
       - "/etc/httpd/conf/httpd-galepages.conf:/etc/httpd/conf.d/httpd-galepages.conf"
       - "/var/log/httpd:/var/log/httpd"
     ports:
       - "9187:9187"
+
+  galesupport:
+    build:
+     context: .
+     dockerfile: Dockerfile
+     args:
+      - app_port=9076
+    image: galesupport:v1
+    container_name: galesupport
+    volumes:
+      - "/var/www/html/galesupport:/var/www/html/galesupport"
+      - "/etc/httpd/conf/httpd-galesupport.conf:/etc/httpd/conf.d/httpd-galesupport.conf"
+      - "/var/log/httpd:/var/log/httpd"
+    ports:
+      - "9076:9076"
+
+  supportgale:
+    build:
+     context: .
+     dockerfile: Dockerfile
+     args:
+      - app_port=9192
+    image: supportgale:v1
+    container_name: supportgale
+    volumes:
+      - "/var/www/html/supportgale:/var/www/html/supportgale"
+      - "/etc/httpd/conf/httpd-supportgale.conf:/etc/httpd/conf.d/httpd-supportgale.conf"
+      - "/var/log/httpd:/var/log/httpd"
+    ports:
+      - "9192:9192"
+
