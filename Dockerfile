@@ -16,7 +16,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN dnf -y install dnf-utils
 RUN dnf module reset php -y
-RUN dnf module install php:remi-7.4 -y
+RUN dnf module install php:remi-8.0 -y
 
 # Update the repository sources list
 RUN yum -y update
