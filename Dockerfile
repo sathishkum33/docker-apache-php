@@ -5,6 +5,7 @@ MAINTAINER Sathish Kumar <sathishkum33@gmail.com>
 
 #Adding argument for build
 ARG app_port
+ARG version
 
 # Add EPERL repo
 RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
@@ -16,7 +17,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN dnf -y install dnf-utils
 RUN dnf module reset php -y
-RUN dnf module install php:remi-8.0 -y
+RUN dnf module install php:remi-${version} -y
 
 # Update the repository sources list
 RUN yum -y update
