@@ -22,7 +22,7 @@ services:
      dockerfile: Dockerfile
      args:
       - app_port=9076
-      - version=7.4
+      - version=8.0
     image: galesupport:v1
     container_name: galesupport
     volumes:
